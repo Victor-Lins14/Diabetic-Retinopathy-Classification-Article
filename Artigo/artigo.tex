@@ -27,10 +27,10 @@ Davi Oliveira de Alencar}
 \textit{Graduação em Ciência da Computação} \\
 \textit{Universidade de Fortaleza (UNIFOR)} \\
 Fortaleza, Ceará, Brasil \\
-gabriel@email.com,
-vlinsgurgel@email.com,
-lorenzo@email.com,
-davi@email.com}}
+gabrielnobre.dev@gmail.com,
+vlinsgurgel@gmail.com,
+barroslorenzopro@gmail.com,
+davioalencar10@gmail.com}}
 
 \maketitle
 
@@ -577,78 +577,21 @@ distintas durante a execução. Assim, na configuração
 avaliada, o ensemble não apresentou ganho suficiente para justificar
 seu custo computacional adicional.
 
-\subsection{Discussão dos principais achados}
-
-Um dos achados mais relevantes ao longo dos experimentos foi o impacto
-da resolução. Aumentar o EfficientNetV2-S de 384\,px para 512\,px
-elevou o kappa de 0,57 para 0,73 e quase dobrou o recall de
-\textit{Mild}, de 0,26 para 0,34. A explicação é direta:
-microaneurismas e exsudatos característicos dos estágios iniciais da
-retinopatia são estruturas pequenas, e resoluções menores podem
-reduzir ou eliminar detalhes importantes que o modelo precisaria aprender
-a reconhecer.
-
-O desbalanceamento da base, por outro lado, provou ser mais resistente
-do que o esperado. A ponderação de classes na função de
-perda ajudou, mas não foi suficiente para compensar uma razão de
-36:1 entre \textit{No\,DR} e \textit{Proliferative}. A situação
-da classe \textit{Mild} é ainda mais delicada porque combina dois
-problemas ao mesmo tempo: poucos exemplos e alta similaridade visual
-com outras classes. O ConvNeXt-Small ilustra bem o risco de não
-observar as métricas por classe: kappa de 0,7453, mas F1 de 0,09
-para \textit{Mild}. Um modelo assim poderia passar por uma
-avaliação superficial e ainda assim ser inapropriado para uso
-clínico real.
-
-Quanto ao ensemble, os resultados indicam que combinar modelos sem
-calibração prévia pode ser contraproducente. Sem garantir que
-as distribuições de probabilidade de cada modelo estejam numa
-mesma escala, a combinação por média ponderada não agrega
-informação de forma coerente. é uma lição importante:
-ensemble não é uma solução automática para melhorar
-desempenho --- a implementação importa tanto quanto a estratégia.
-
 % =============================================================
 \section{Conclusão}
 % =============================================================
 
-Este trabalho avaliou diferentes configurações de arquiteturas de
-aprendizado profundo --- incluindo CNNs modernas e um Vision Transformer
---- para a classificação de cinco níveis de severidade de
-retinopatia diabética em 35.126 imagens de fundo de retina. Foram
-investigados o impacto da resolução de entrada, do fine-tuning
-parcial do \textit{backbone}, da ponderação de classes e da
-combinação de modelos por ensemble.
+Este trabalho avaliou diferentes configurações de arquiteturas de aprendizado profundo --- incluindo CNNs modernas e um Vision Transformer --- para a classificação de cinco níveis de severidade de retinopatia diabética em 35.126 imagens de fundo de retina. 
 
-O EfficientNetV2-S em 512$\times$512 pixels apresentou o melhor
-equilíbrio clínico, com kappa de 0,7313 e F1 macro de 0,54, sendo
-um dos modelos com maior capacidade de detectar os cinco níveis de forma
-consistente. O ConvNeXt-Small alcançou o maior kappa absoluto
-(0,7453), mas seu recall de 0,05 para \textit{Mild} compromete sua
-utilidade em cenários de triagem precoce. O ensemble não superou os
-modelos individuais, evidenciando que a combinação de modelos
-exige calibração adequada para ser efetiva.
+Dentre as arquiteturas analisadas, o EfficientNetV2-S em 512$\times$512 pixels apresentou o melhor equilíbrio clínico, com kappa de 0,7313 e F1 macro de 0,54. O ConvNeXt-Small alcançou o maior kappa absoluto (0,7453), porém, seu recall de apenas 0,05 para a classe \textit{Mild} compromete drasticamente sua utilidade em um cenário real de triagem precoce. A abordagem de combinação de modelos por \textit{ensemble} não superou as arquiteturas individuais, evidenciando que a agregação de predições exige calibração rigorosa de probabilidades para ser efetiva.
 
-De forma geral, os experimentos mostraram que resolução e
-fine-tuning são fatores decisivos para o desempenho, mas que o
-desbalanceamento extremo da base permanece o principal obstáculo.
-Nenhuma das estratégias testadas foi suficiente para garantir boa
-detecção em todas as classes simultaneamente --- especialmente em
-\textit{Mild}, onde a dificuldade é tanto estatística quanto visual.
+Apesar de a métrica Kappa ter sido priorizada em detrimento da acurácia global para mitigar o viés da classe majoritária, a distribuição fortemente desbalanceada dos dados ainda "mascarou" o desempenho real das redes nas classes minoritárias. A aplicação de \textit{class weights} na função de perda auxiliou o aprendizado inicialmente, mas provou-se insuficiente para resolver o problema estrutural da base. Outras técnicas mais robustas de tratamento de desbalanceamento deveriam ter sido exploradas exaustivamente para evitar a negligência algorítmica dos estágios iniciais da doença.
 
-O estudo tem limitações relevantes: não foi utilizado conjunto
-de teste externo independente, as restrições de memória de GPU
-impediram explorar 1024\,px em todas as arquiteturas, e os experimentos
-com \textit{focal loss} e \textit{sampler} não foram concluídos.
-Para trabalhos futuros, as direções mais promissoras incluem
-\textit{data augmentation} seletiva nas classes minoritárias ---
-aplicando transformações mais intensas especificamente sobre
-\textit{Mild}, \textit{Severe} e \textit{Proliferative} como forma de
-oversampling sem introduzir ruído nas classes já bem representadas
----, validação cruzada estratificada, \textit{threshold moving}
-por classe, calibração de probabilidades para viabilizar o ensemble
-e aplicação de Grad-CAM para interpretar as regiões de interesse
-identificadas pelos modelos.
+Outra consideração técnica crítica levantada ao longo dos experimentos diz respeito à manipulação da resolução das imagens. Alterar as dimensões de entrada de um mesmo modelo pré-treinado em diferentes testes não é considerado uma boa prática computacional. Cada arquitetura é arquitetada e otimizada matematicamente para trabalhar com dimensões específicas. Ainda que o \textit{framework} de Deep Learning readapte os tensores internamente por meio de \textit{adaptive pooling} para evitar erros de compilação, o número de parâmetros, o arranjo das camadas e a profundidade dos mapas de características permanecem inalterados. Forçar resoluções arbitrárias pode, consequentemente, comprometer a eficiência da extração de \textit{features} nativa da rede.
+
+Por fim, a limitação metodológica mais severa deste estudo foi a ausência de uma divisão prévia e estática do \textit{dataset} em conjuntos de treino, validação e teste (\textit{holdout} fixo e gravado em disco). Como as partições dos dados foram realizadas de forma independente durante o treinamento de cada modelo isolado, existe uma altíssima probabilidade de ter ocorrido vazamento de dados (\textit{data leakage}). No momento de calcular as predições combinadas do \textit{ensemble}, o subconjunto de teste utilizado muito possivelmente continha imagens que já haviam sido visualizadas durante o processo de treinamento de algumas das arquiteturas subjacentes, o que invalida estatisticamente a integridade e a generalização dos resultados finais do \textit{ensemble}.
+
+Para trabalhos futuros, as prioridades absolutas incluem: o estabelecimento de um particionamento estratificado e rigoroso dos dados antes de qualquer experimentação; o respeito irrestrito às dimensões de entrada nativas documentadas para cada arquitetura; e a exploração de abordagens mais avançadas para mitigação do desbalanceamento extremo, como \textit{data augmentation} seletivo focando apenas nas classes minoritárias, o uso de \textit{Focal Loss} e calibração de limite de decisão (\textit{threshold moving}).
 
 % =============================================================
 \begin{thebibliography}{00}
