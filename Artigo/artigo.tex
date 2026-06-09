@@ -8,6 +8,7 @@
 \usepackage{xcolor}
 \usepackage{multirow}
 \usepackage[brazil]{babel}
+\usepackage{float} % <--- PACOTE ADICIONADO AQUI PARA TRAVAR AS IMAGENS
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
@@ -436,49 +437,49 @@ ter acelerado demais o aprendizado inicial, limitando a capacidade do
 modelo de refinar suas representações nas épocas seguintes.
 
 % ==========================================
-% Bloco 1: EfficientNetV2-S (Empilhadas)
+% Bloco 1: EfficientNetV2-S (Fixo com [H])
 % ==========================================
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
-\includegraphics[width=\columnwidth]{aprendizado.png}
+\includegraphics[width=0.95\columnwidth]{aprendizado.png}
 \caption{Curva de aprendizado da loss do EfficientNetV2-S em 512\,px.}
 \label{fig:loss_v2}
 
-\vspace{0.4cm}
+\vspace{0.3cm}
 
-\includegraphics[width=\columnwidth]{acuracia.png}
+\includegraphics[width=0.95\columnwidth]{acuracia.png}
 \caption{Curva de aprendizado da acurácia do EfficientNetV2-S em 512\,px.}
 \label{fig:acc_v2}
 \end{figure}
 
 % ==========================================
-% Bloco 2: DenseNet169 (Empilhadas)
+% Bloco 2: DenseNet169 (Fixo com [H])
 % ==========================================
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
-\includegraphics[width=\columnwidth]{aprendizado_densenet.png}
+\includegraphics[width=0.95\columnwidth]{aprendizado_densenet.png}
 \caption{Curva de aprendizado da loss do DenseNet169.}
 \label{fig:loss_dense}
 
-\vspace{0.4cm}
+\vspace{0.3cm}
 
-\includegraphics[width=\columnwidth]{acuracia_densenet.png}
+\includegraphics[width=0.95\columnwidth]{acuracia_densenet.png}
 \caption{Curva de aprendizado da acurácia do DenseNet169.}
 \label{fig:acc_dense}
 \end{figure}
 
 % ==========================================
-% Bloco 3: ConvNeXt-Small (Empilhadas)
+% Bloco 3: ConvNeXt-Small (Fixo com [H])
 % ==========================================
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
-\includegraphics[width=\columnwidth]{aprendizado_convnext.png}
+\includegraphics[width=0.95\columnwidth]{aprendizado_convnext.png}
 \caption{Curva de aprendizado da loss do ConvNeXt-Small.}
 \label{fig:loss_convnext}
 
-\vspace{0.4cm}
+\vspace{0.3cm}
 
-\includegraphics[width=\columnwidth]{acuracia_convnext.png}
+\includegraphics[width=0.95\columnwidth]{acuracia_convnext.png}
 \caption{Curva de aprendizado da acurácia do ConvNeXt-Small.}
 \label{fig:acc_convnext}
 \end{figure}
