@@ -424,72 +424,63 @@ detalha as métricas por classe dos três modelos.
 
 \subsection{Curvas de aprendizagem}
 
-% Descomente este bloco quando a figura estiver pronta:
-% \begin{figure}[htbp]
-% \centering
-% \includegraphics[width=\columnwidth]{curvas_aprendizado.png}
-% \caption{Curvas de \textit{loss} e kappa quadrático de
-% validação por época para os três melhores modelos.}
-% \label{fig:curvas}
-% \end{figure}
-
 As curvas de convergência mostram comportamentos bem diferentes entre
-os modelos. Na Fig.\ref{fig:acc_v2} o EfficientNetV2-S convergiu de forma estável ao longo de
+os modelos. As Figs.~\ref{fig:loss_v2} e \ref{fig:acc_v2} demonstram que o EfficientNetV2-S convergiu de forma estável ao longo de
 14 épocas, sem sinais evidentes de sobreajuste até que o
-\textit{early stopping} interrompeu o treinamento. O DenseNet169 levou
+\textit{early stopping} interrompeu o treinamento. Por outro lado, as Figs.~\ref{fig:loss_dense} e \ref{fig:acc_dense} revelam que o DenseNet169 levou
 mais tempo para estabilizar, mas manteve progressão consistente até
-a época\,18. Já o ConvNeXt-Small atingiu seu melhor resultado na
+a época\,18. Já o ConvNeXt-Small, cujas curvas estão ilustradas nas Figs.~\ref{fig:loss_convnext} e \ref{fig:acc_convnext}, atingiu seu melhor resultado na
 época\,3 --- um comportamento notável. A combinação de
 \textit{backbone} amplamente descongelado com imagens de 1024\,px parece
 ter acelerado demais o aprendizado inicial, limitando a capacidade do
 modelo de refinar suas representações nas épocas seguintes.
 
+% ==========================================
+% Bloco 1: EfficientNetV2-S (Empilhadas)
+% ==========================================
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{aprendizado.png}
-\caption{Curva de aprendizado da loss do EfficientNetV2-S em 512\,px
-(\textit{checkpoint} da época\,14) no conjunto de validação e treinamento.}
+\caption{Curva de aprendizado da loss do EfficientNetV2-S em 512\,px.}
 \label{fig:loss_v2}
-\end{figure}
 
-\begin{figure}[htbp]
-\centering
+\vspace{0.4cm}
+
 \includegraphics[width=\columnwidth]{acuracia.png}
-\caption{Curva de aprendizado da acurácia do EfficientNetV2-S em 512\,px
-(\textit{checkpoint} da época\,14) no conjunto de validação e treinamento.}
+\caption{Curva de aprendizado da acurácia do EfficientNetV2-S em 512\,px.}
 \label{fig:acc_v2}
 \end{figure}
 
+% ==========================================
+% Bloco 2: DenseNet169 (Empilhadas)
+% ==========================================
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{aprendizado_densenet.png}
-\caption{Curva de aprendizado da loss do DenseNet169
-(\textit{checkpoint} da época\,18) no conjunto de validação e treinamento.}
+\caption{Curva de aprendizado da loss do DenseNet169.}
 \label{fig:loss_dense}
-\end{figure}
 
-\begin{figure}[htbp]
-\centering
+\vspace{0.4cm}
+
 \includegraphics[width=\columnwidth]{acuracia_densenet.png}
-\caption{Curva de aprendizado da acurácia do DenseNet169
-(\textit{checkpoint} da época\,18) no conjunto de validação e treinamento.}
+\caption{Curva de aprendizado da acurácia do DenseNet169.}
 \label{fig:acc_dense}
 \end{figure}
 
+% ==========================================
+% Bloco 3: ConvNeXt-Small (Empilhadas)
+% ==========================================
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\columnwidth]{aprendizado_convnext.png}
-\caption{Curva de aprendizado da loss do ConvNeXt-Small
-(\textit{checkpoint} da época\,3) no conjunto de validação e treinamento.}
-\label{fig:loss_dense}
-\end{figure}
+\caption{Curva de aprendizado da loss do ConvNeXt-Small.}
+\label{fig:loss_convnext}
 
-\begin{figure}[htbp]
-\centering
+\vspace{0.4cm}
+
 \includegraphics[width=\columnwidth]{acuracia_convnext.png}
-\caption{Curva de aprendizado da acurácia do ConvNeXt-Small
-(\textit{checkpoint} da época\,3) no conjunto de validação e treinamento.}
-\label{fig:acc_dense}
+\caption{Curva de aprendizado da acurácia do ConvNeXt-Small.}
+\label{fig:acc_convnext}
 \end{figure}
 
 \subsection{Matrizes de confusão}
