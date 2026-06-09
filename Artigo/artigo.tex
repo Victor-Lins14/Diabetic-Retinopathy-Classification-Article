@@ -52,7 +52,7 @@ Kappa e F1 macro. Também foi avaliada uma estratégia de ensemble
 baseada em \textit{Weighted Soft Voting}; entretanto, essa abordagem
 não superou os modelos individuais na configuração testada. Os
 resultados sugerem que a resolução das imagens, o ajuste fino das
-camadas e o tratamento do desbalanceamento são fatores determinantes
+camadas e o tratamento do desbalanceamento extremo são fatores determinantes
 para o desempenho na classificação multiclasse de retinopatia
 diabética.
 \end{abstract}
@@ -122,13 +122,13 @@ aprendizado profundo e ensemble por stacking, obtendo resultados
 expressivos na detecção de retinopatia diabética. Esses estudos
 evidenciam o interesse crescente da comunidade científica em explorar
 diferentes arquiteturas e estratégias de combinação de modelos
-para melhorar o desempenho dos sistemas automatizados de apoio \`a
+para melhorar o desempenho dos sistemas automatizados de apoio à
 triagem oftalmólogica.
 
 Apesar dos avanços observados na literatura, a classificação
 automática da retinopatia diabética ainda apresenta desafios
 relevantes. Um deles é o desbalanceamento entre as classes, uma vez
-que bases de dados públicas frequentemente possuem predomin\^ancia de
+que bases de dados públicas frequentemente possuem predominância de
 imagens sem sinais da doença em comparação com os níveis
 mais severos. Além disso, trata-se de uma tarefa multiclasse e
 ordinal, pois os níveis de severidade seguem uma progressão clínica
@@ -178,8 +178,7 @@ Para otimizar o treinamento dos modelos, as imagens foram reorganizadas
 em diretórios separados por classe, utilizando uma estrutura compatível
 com o carregamento por \textit{ImageFolder}. O conjunto foi dividido em
 treino e validação na proporção 80/20, com separação
-estratificada por classe e semente fixa igual a 42. Não foi utilizado
-um conjunto de teste externo independente.
+estratificada por classe. Para garantir a reprodutibilidade e a consistência das partições entre todas as arquiteturas avaliadas, foi definida uma \textit{seed} fixa igual a 42. Não foi utilizado um conjunto de teste externo independente.
 
 \begin{table}[htbp]
 \caption{Distribuição da base de dados por classe}
@@ -202,13 +201,12 @@ um conjunto de teste externo independente.
 \end{tabular}
 \end{table}
 
-Observa-se forte desbalanceamento entre as classes, com predomin\^ancia
+Observa-se forte desbalanceamento entre as classes, com predominância
 da classe 0, correspondente a imagens sem sinais de retinopatia diabética.
 Esse fator motivou o uso de métricas além da acurácia e a aplicação
 de estratégias de ponderação durante o treinamento.
 
 \subsection{Pré-processamento e balanceamento dos dados}
-
 
 \begin{table*}[htbp]
 \caption{Resumo das principais configurações e experimentos realizados}
@@ -294,7 +292,7 @@ avaliado. Para evitar sobreajuste, foi empregado \textit{early stopping},
 monitorando principalmente o coeficiente Kappa ponderado quadrático no
 conjunto de validação. A versão final considerada para cada
 modelo correspondeu ao melhor \textit{checkpoint} obtido durante o
-treinamento, e não necessariamente \`a última época executada.
+treinamento, e não necessariamente à última época executada.
 
 \subsection{Estratégia de classificação e ensemble}
 
@@ -365,14 +363,14 @@ O caso do EfficientNet-B0 é ilustrativo de um problema recorrente em
 bases desbalanceadas: acurácia de 0,74 com kappa de apenas 0,26
 indica que o modelo aprendeu, na prática, a prever quase sempre a
 classe \textit{No\,DR} sem real capacidade de distinguir os níveis da
-doença. Essa discrep\^ancia reforça a import\^ancia de avaliar
+doença. Essa discrepância reforça a importância de avaliar
 os modelos pelo kappa quadrático e pelo F1 macro, e não apenas pela
 acurácia global.
 
 \subsection{Melhores modelos individuais}
 
-Os três modelos com melhor desempenho --- ConvNeXt-Small,
-EfficientNetV2-S e DenseNet169 --- apresentaram perfis bastante
+Os três modelos com melhor desempenho: ConvNeXt-Small,
+EfficientNetV2-S e DenseNet169; apresentaram perfis bastante
 distintos, e essa diferença é relevante do ponto de vista
 clínico.
 
@@ -381,7 +379,7 @@ fragilidade importante: recall de apenas 0,05 para a classe
 \textit{Mild} (F1~=~0,09). Na prática, isso significa que o modelo
 quase não detecta o estágio inicial da retinopatia, que é
 justamente onde a intervenção precoce teria maior impacto. O bom
-resultado geral acaba mascarado pela domin\^ancia da classe
+resultado geral acaba mascarado pela dominância da classe
 \textit{No\,DR}, que corresponde a 73\% das amostras e teve recall de
 0,93.
 
@@ -390,15 +388,15 @@ as cinco classes, com kappa de 0,7313 e F1 macro de 0,54. Os recalls de
 0,42 para \textit{Severe} e 0,67 para \textit{Proliferative} indicam
 que o modelo conseguiu aprender características das classes mais
 graves, mesmo com muito menos exemplos disponíveis. A classe
-\textit{Mild} permaneceu a mais difícil (recall 0,34; F1 0,27) ---
+\textit{Mild} permaneceu a mais difícil (recall 0,34; F1 0,27);
 um resultado esperado, considerando que essa classe tem cerca de 10
 vezes menos amostras que \textit{No\,DR} e que suas alterações
 vasculares são visualmente sutis, podendo se confundir facilmente com
 retinas saudáveis.
 
 O DenseNet169 em 512\,px fechou o grupo dos melhores com kappa 0,7114 e
-F1 macro de 0,55. Sua convergência mais lenta --- pico na
-época\,18 --- sugere um treinamento mais gradual e estável, e seu
+F1 macro de 0,55. Sua convergência mais lenta, pico na
+época\,18, sugere um treinamento mais gradual e estável, e seu
 ponto forte ficou no recall de \textit{Proliferative} (0,67), o melhor
 entre todos os modelos testados. A Tabela~\ref{tab:metricas_classe}
 detalha as métricas por classe dos três modelos.
@@ -496,7 +494,7 @@ os modelos. As Figs.~\ref{fig:loss_v2} e \ref{fig:acc_v2} demonstram que o Effic
 \textit{early stopping} interrompeu o treinamento. Por outro lado, as Figs.~\ref{fig:loss_dense} e \ref{fig:acc_dense} revelam que o DenseNet169 levou
 mais tempo para estabilizar, mas manteve progressão consistente até
 a época\,18. Já o ConvNeXt-Small, cujas curvas estão ilustradas nas Figs.~\ref{fig:loss_convnext} e \ref{fig:acc_convnext}, atingiu seu melhor resultado na
-época\,3 --- um comportamento notável. A combinação de
+época\,3, um comportamento notável. A combinação de
 \textit{backbone} amplamente descongelado com imagens de 1024\,px parece
 ter acelerado demais o aprendizado inicial, limitando a capacidade do
 modelo de refinar suas representações nas épocas seguintes.
@@ -537,7 +535,7 @@ Já a matriz do DenseNet169 em 512\,px (Fig.~\ref{fig:confusao_densenet}) eviden
 O ensemble por \textit{Weighted Soft Voting} apresentou desempenho
 inferior ao esperado. Combinando seis modelos com pesos proporcionais ao
 kappa individual de cada um, o resultado foi kappa de 0,4691 e F1 macro
-de 0,39 --- pior que qualquer um dos três melhores modelos isolados,
+de 0,39, pior que qualquer um dos três melhores modelos isolados,
 como mostra a Tabela~\ref{tab:ensemble}.
 
 \begin{table}[htbp]
@@ -566,32 +564,46 @@ A Fig.~\ref{fig:confusao_ensemble} ilustra a matriz de confusão do ensemble, ev
 \label{fig:confusao_ensemble}
 \end{figure}
 
-A hipótese mais provável para esse resultado é a incompatibilidade
-entre as distribuições de probabilidade dos modelos: quando as
-saídas não estão calibradas numa mesma escala, a média ponderada
-tende a produzir predições inconsistentes. Além disso, os pesos
-do ensemble foram definidos de forma fixa, sem otimização sobre o
-conjunto de validação. Não se pode descartar também algum
-problema no carregamento dos \textit{checkpoints} de arquiteturas
-distintas durante a execução. Assim, na configuração
-avaliada, o ensemble não apresentou ganho suficiente para justificar
-seu custo computacional adicional.
+A hipótese mais provável para esse resultado é a incompatibilidade entre as distribuições de probabilidade dos modelos: quando as saídas não estão calibradas numa mesma escala, a média ponderada tende a produzir predições inconsistentes. Modelos com tendência à superconfiança (\textit{overconfidence}) podem facilmente dominar a votação, anulando os acertos de redes mais conservadoras. Além disso, embora os pesos do ensemble tenham sido calculados com base no desempenho individual prévio, eles foram aplicados de forma empírica e estática, sem uma otimização sistemática (como a calibração de um meta-modelo em \textit{stacking}) sobre as predições de validação. Não se pode descartar também algum problema técnico ou inconsistência no carregamento e processamento dos \textit{checkpoints} de arquiteturas tão distintas durante a execução final. Assim, na configuração avaliada, o ensemble não apresentou ganho de desempenho suficiente para justificar o seu custo computacional adicional, visto que a execução simultânea de múltiplas arquiteturas profundas eleva drasticamente a latência de inferência, inviabilizando a sua aplicação ágil e escalável em ambientes clínicos reais de triagem.
+
+\subsection{Discussão dos principais achados}
+
+Um dos achados mais relevantes ao longo dos experimentos foi o impacto
+da resolução. Aumentar o EfficientNetV2-S de 384\,px para 512\,px
+elevou o kappa de 0,57 para 0,73 e quase dobrou o recall de
+\textit{Mild}, de 0,26 para 0,34. A explicação é direta:
+microaneurismas e exsudatos característicos dos estágios iniciais da
+retinopatia são estruturas pequenas, e resoluções menores podem
+reduzir ou eliminar detalhes importantes que o modelo precisaria aprender
+a reconhecer.
+
+O desbalanceamento da base, por outro lado, provou ser mais resistente
+do que o esperado. A ponderação de classes na função de
+perda ajudou, mas não foi suficiente para compensar uma razão de
+36:1 entre \textit{No\,DR} e \textit{Proliferative}. A situação
+da classe \textit{Mild} é ainda mais delicada porque combina dois
+problemas ao mesmo tempo: poucos exemplos e alta similaridade visual
+com outras classes. O ConvNeXt-Small ilustra bem o risco de não
+observar as métricas por classe: kappa de 0,7453, mas F1 de 0,09
+para \textit{Mild}. Um modelo assim poderia passar por uma
+avaliação superficial e ainda assim ser inapropriado para uso
+clínico real.
 
 % =============================================================
 \section{Conclusão}
 % =============================================================
 
-Este trabalho avaliou diferentes configurações de arquiteturas de aprendizado profundo --- incluindo CNNs modernas e um Vision Transformer --- para a classificação de cinco níveis de severidade de retinopatia diabética em 35.126 imagens de fundo de retina. 
+Este trabalho avaliou diferentes configurações de arquiteturas de aprendizado profundo,  incluindo CNNs modernas e um Vision Transformer, para a classificação de cinco níveis de severidade de retinopatia diabética em 35.126 imagens de fundo de retina. 
 
 Dentre as arquiteturas analisadas, o EfficientNetV2-S em 512$\times$512 pixels apresentou o melhor equilíbrio clínico, com kappa de 0,7313 e F1 macro de 0,54. O ConvNeXt-Small alcançou o maior kappa absoluto (0,7453), porém, seu recall de apenas 0,05 para a classe \textit{Mild} compromete drasticamente sua utilidade em um cenário real de triagem precoce. A abordagem de combinação de modelos por \textit{ensemble} não superou as arquiteturas individuais, evidenciando que a agregação de predições exige calibração rigorosa de probabilidades para ser efetiva.
 
 Apesar de a métrica Kappa ter sido priorizada em detrimento da acurácia global para mitigar o viés da classe majoritária, a distribuição fortemente desbalanceada dos dados ainda "mascarou" o desempenho real das redes nas classes minoritárias. A aplicação de \textit{class weights} na função de perda auxiliou o aprendizado inicialmente, mas provou-se insuficiente para resolver o problema estrutural da base. Outras técnicas mais robustas de tratamento de desbalanceamento deveriam ter sido exploradas exaustivamente para evitar a negligência algorítmica dos estágios iniciais da doença.
 
-Outra consideração técnica crítica levantada ao longo dos experimentos diz respeito à manipulação da resolução das imagens. Alterar as dimensões de entrada de um mesmo modelo pré-treinado em diferentes testes não é considerado uma boa prática computacional. Cada arquitetura é arquitetada e otimizada matematicamente para trabalhar com dimensões específicas. Ainda que o \textit{framework} de Deep Learning readapte os tensores internamente por meio de \textit{adaptive pooling} para evitar erros de compilação, o número de parâmetros, o arranjo das camadas e a profundidade dos mapas de características permanecem inalterados. Forçar resoluções arbitrárias pode, consequentemente, comprometer a eficiência da extração de \textit{features} nativa da rede.
+Outra consideração técnica crítica levantada ao longo dos experimentos diz respeito à manipulação da resolução das imagens. Alterar as dimensões de entrada de um mesmo modelo pré-treinado em diferentes testes não é considerado uma boa prática computacional. Cada arquitetura é desenhada e otimizada matematicamente para trabalhar com dimensões específicas. Ainda que o \textit{framework} de Deep Learning readapte os tensores internamente por meio de \textit{adaptive pooling} para evitar erros de compilação, o número de parâmetros, o arranjo das camadas e a profundidade dos mapas de características permanecem inalterados. Forçar resoluções arbitrárias pode, consequentemente, comprometer a eficiência da extração de \textit{features} nativa da rede.
 
-Por fim, a limitação metodológica mais severa deste estudo foi a ausência de uma divisão prévia e estática do \textit{dataset} em conjuntos de treino, validação e teste (\textit{holdout} fixo e gravado em disco). Como as partições dos dados foram realizadas de forma independente durante o treinamento de cada modelo isolado, existe uma altíssima probabilidade de ter ocorrido vazamento de dados (\textit{data leakage}). No momento de calcular as predições combinadas do \textit{ensemble}, o subconjunto de teste utilizado muito possivelmente continha imagens que já haviam sido visualizadas durante o processo de treinamento de algumas das arquiteturas subjacentes, o que invalida estatisticamente a integridade e a generalização dos resultados finais do \textit{ensemble}.
+Por fim, a principal limitação metodológica deste estudo foi a ausência de um conjunto de teste isolado (\textit{test set} independente). Embora o uso de uma \textit{seed} fixa (42) tenha garantido que não houvesse mistura ou vazamento de dados de treino para validação, a arquitetura experimental pecou por utilizar o próprio subconjunto de validação tanto para acionar o \textit{early stopping} e escolher o melhor modelo, quanto para relatar as métricas finais do \textit{ensemble}. Essa dupla utilização da mesma partição introduz um viés otimista de avaliação (\textit{evaluation bias}), pois as configurações finais do sistema acabam por ser indiretamente sobreajustadas aos dados de validação, mascarando a real capacidade de generalização do algoritmo em dados totalmente inéditos.
 
-Para trabalhos futuros, as prioridades absolutas incluem: o estabelecimento de um particionamento estratificado e rigoroso dos dados antes de qualquer experimentação; o respeito irrestrito às dimensões de entrada nativas documentadas para cada arquitetura; e a exploração de abordagens mais avançadas para mitigação do desbalanceamento extremo, como \textit{data augmentation} seletivo focando apenas nas classes minoritárias, o uso de \textit{Focal Loss} e calibração de limite de decisão (\textit{threshold moving}).
+Para trabalhos futuros, as prioridades absolutas incluem: o estabelecimento de um particionamento rigoroso dos dados em três vias (treino, validação e teste isolado); o respeito irrestrito às dimensões de entrada nativas documentadas para cada arquitetura; e a exploração de abordagens mais avançadas para mitigação do desbalanceamento extremo, como \textit{data augmentation} seletivo focado apenas nas classes minoritárias, o uso de \textit{Focal Loss} e calibração de limite de decisão (\textit{threshold moving}).
 
 % =============================================================
 \begin{thebibliography}{00}
