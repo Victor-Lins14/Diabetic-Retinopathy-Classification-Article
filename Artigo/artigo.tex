@@ -241,23 +241,36 @@ ResNet50, DenseNet121, DenseNet169 e ConvNeXt-Small. Como representante
 baseado em mecanismos de atenção visual, foi avaliado o modelo
 Swin-Tiny.
 
-Todos os modelos foram utilizados com pesos pré-treinados em ImageNet,
-caracterizando uma abordagem de transferência de aprendizado. A camada
-final de classificação foi substituída para produzir cinco
-saídas, correspondentes aos níveis de severidade da retinopatia
-diabética. As variações experimentais envolveram diferentes
-resoluções de entrada, graus de congelamento do \textit{backbone},
-otimizadores, taxas de aprendizado, tamanhos de lote e estratégias de
-fine-tuning.
+A Tabela~\ref{tab:resumo_experimentos} apresenta o resumo de todas as principais configurações e variações experimentais testadas ao longo do trabalho. Todos os modelos foram utilizados com pesos pré-treinados em ImageNet, caracterizando uma abordagem de transferência de aprendizado. A camada final de classificação foi substituída para produzir cinco saídas, correspondentes aos níveis de severidade da retinopatia diabética. 
 
-Inicialmente, foram avaliadas arquiteturas com maior nível de
-congelamento das camadas pré-treinadas, funcionando como
-configurações de referência. Em seguida, os modelos com
-resultados mais promissores foram submetidos a ajustes mais específicos,
-incluindo descongelamento parcial ou total do \textit{backbone}, aumento
-da resolução de entrada e alteração do otimizador. Essa
-estratégia permitiu analisar o impacto do fine-tuning e da
-resolução das imagens no desempenho dos classificadores.
+\begin{table*}[htbp]
+\caption{Resumo das principais configurações e experimentos realizados}
+\label{tab:resumo_experimentos}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l l c l l c l}
+\hline
+\textbf{Modelo} & \textbf{Resolução} & \textbf{Backbone} & \textbf{Augmentation} & \textbf{Otimizador (LR Head / LR Base)} & \textbf{Épocas} & \textbf{Observações} \\
+\hline
+EfficientNet-B0 & 224$\times$224 & Congelado & Hor/Vert Flip & Adam (1e-4 / 1e-5) & 25 & Baseline \\
+EfficientNet-B2 & 380$\times$380 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 19/25 & Class weights aplicados \\
+ResNet50 & 256$\times$256 & 25\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 23/25 & Baixo F1-Macro \\
+ResNet50 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 24/25 & Desempenho intermediário \\
+DenseNet121 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 21/25 & Ótima taxa de acerto \\
+DenseNet169 & 512$\times$512 & 89.6\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 18/25 & Melhor recall em severos \\
+EfficientNetV2-S & 384$\times$384 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 17/25 & Melhoria com imagens maiores \\
+EfficientNetV2-S & 512$\times$512 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 14/25 & \textbf{Melhor equilíbrio clínico} \\
+Swin-Tiny & 224$\times$224 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 25/25 & Desempenho forte em baixa res. \\
+ConvNeXt-Small & 512$\times$512 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 29/50 & Early stopping acionado \\
+ConvNeXt-Small & 1024$\times$1024 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 3/50 & \textbf{Maior Kappa geral} \\
+\hline
+\multicolumn{7}{l}{\textit{Nota: Todos os modelos utilizaram paciência de 2 épocas para o Scheduler e pesos de classe (class weights) para lidar com o desbalanceamento.}}
+\end{tabular}
+}
+\end{table*}
+
+Inicialmente, foram avaliadas arquiteturas com maior nível de congelamento das camadas pré-treinadas, funcionando como configurações de referência. Em seguida, os modelos com resultados mais promissores foram submetidos a ajustes mais específicos, incluindo descongelamento parcial ou total do \textit{backbone}, aumento da resolução de entrada e alteração do otimizador. Essa estratégia permitiu analisar o impacto do fine-tuning e da resolução das imagens no desempenho dos classificadores.
 
 \subsection{Estratégia de treinamento}
 
@@ -534,6 +547,15 @@ DenseNet169 (512\,px)      & 0,55 & 0,71 \\
 \hline
 \end{tabular}
 \end{table}
+
+A Fig.~\ref{fig:confusao_ensemble} ilustra a matriz de confusão do ensemble, evidenciando onde o modelo combinado falhou nas predições.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{matriz_confusao_ensemble.png}
+\caption{Matriz de confusão do ensemble (Weighted Soft Voting) no conjunto de validação.}
+\label{fig:confusao_ensemble}
+\end{figure}
 
 A hipótese mais provável para esse resultado é a incompatibilidade
 entre as distribuições de probabilidade dos modelos: quando as
