@@ -8,7 +8,7 @@
 \usepackage{xcolor}
 \usepackage{multirow}
 \usepackage[brazil]{babel}
-\usepackage{float} % <--- PACOTE ADICIONADO AQUI PARA TRAVAR AS IMAGENS
+\usepackage{float}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
@@ -425,6 +425,57 @@ detalha as métricas por classe dos três modelos.
 
 \subsection{Curvas de aprendizagem}
 
+% ==========================================
+% Bloco 1: EfficientNetV2-S (Separados)
+% ==========================================
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\columnwidth]{aprendizado.png}
+\caption{Curva de aprendizado da loss do EfficientNetV2-S em 512\,px.}
+\label{fig:loss_v2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\columnwidth]{acuracia.png}
+\caption{Curva de aprendizado da acurácia do EfficientNetV2-S em 512\,px.}
+\label{fig:acc_v2}
+\end{figure}
+
+% ==========================================
+% Bloco 2: DenseNet169 (Separados)
+% ==========================================
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\columnwidth]{aprendizado_densenet.png}
+\caption{Curva de aprendizado da loss do DenseNet169.}
+\label{fig:loss_dense}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\columnwidth]{acuracia_densenet.png}
+\caption{Curva de aprendizado da acurácia do DenseNet169.}
+\label{fig:acc_dense}
+\end{figure}
+
+% ==========================================
+% Bloco 3: ConvNeXt-Small (Separados)
+% ==========================================
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\columnwidth]{aprendizado_convnext.png}
+\caption{Curva de aprendizado da loss do ConvNeXt-Small.}
+\label{fig:loss_convnext}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\columnwidth]{acuracia_convnext.png}
+\caption{Curva de aprendizado da acurácia do ConvNeXt-Small.}
+\label{fig:acc_convnext}
+\end{figure}
+
 As curvas de convergência mostram comportamentos bem diferentes entre
 os modelos. As Figs.~\ref{fig:loss_v2} e \ref{fig:acc_v2} demonstram que o EfficientNetV2-S convergiu de forma estável ao longo de
 14 épocas, sem sinais evidentes de sobreajuste até que o
@@ -435,54 +486,6 @@ a época\,18. Já o ConvNeXt-Small, cujas curvas estão ilustradas nas Figs.~\re
 \textit{backbone} amplamente descongelado com imagens de 1024\,px parece
 ter acelerado demais o aprendizado inicial, limitando a capacidade do
 modelo de refinar suas representações nas épocas seguintes.
-
-% ==========================================
-% Bloco 1: EfficientNetV2-S (Fixo com [H])
-% ==========================================
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\columnwidth]{aprendizado.png}
-\caption{Curva de aprendizado da loss do EfficientNetV2-S em 512\,px.}
-\label{fig:loss_v2}
-
-\vspace{0.3cm}
-
-\includegraphics[width=0.95\columnwidth]{acuracia.png}
-\caption{Curva de aprendizado da acurácia do EfficientNetV2-S em 512\,px.}
-\label{fig:acc_v2}
-\end{figure}
-
-% ==========================================
-% Bloco 2: DenseNet169 (Fixo com [H])
-% ==========================================
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\columnwidth]{aprendizado_densenet.png}
-\caption{Curva de aprendizado da loss do DenseNet169.}
-\label{fig:loss_dense}
-
-\vspace{0.3cm}
-
-\includegraphics[width=0.95\columnwidth]{acuracia_densenet.png}
-\caption{Curva de aprendizado da acurácia do DenseNet169.}
-\label{fig:acc_dense}
-\end{figure}
-
-% ==========================================
-% Bloco 3: ConvNeXt-Small (Fixo com [H])
-% ==========================================
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.95\columnwidth]{aprendizado_convnext.png}
-\caption{Curva de aprendizado da loss do ConvNeXt-Small.}
-\label{fig:loss_convnext}
-
-\vspace{0.3cm}
-
-\includegraphics[width=0.95\columnwidth]{acuracia_convnext.png}
-\caption{Curva de aprendizado da acurácia do ConvNeXt-Small.}
-\label{fig:acc_convnext}
-\end{figure}
 
 \subsection{Matrizes de confusão}
 
