@@ -439,7 +439,7 @@ detalha as métricas por classe dos três modelos.
 \subsection{Curvas de aprendizagem}
 
 % ==========================================
-% Bloco 1: EfficientNetV2-S (Separados)
+% Bloco 1: EfficientNetV2-S
 % ==========================================
 \begin{figure}[H]
 \centering
@@ -456,7 +456,7 @@ detalha as métricas por classe dos três modelos.
 \end{figure}
 
 % ==========================================
-% Bloco 2: DenseNet169 (Separados)
+% Bloco 2: DenseNet169
 % ==========================================
 \begin{figure}[H]
 \centering
@@ -473,7 +473,7 @@ detalha as métricas por classe dos três modelos.
 \end{figure}
 
 % ==========================================
-% Bloco 3: ConvNeXt-Small (Separados)
+% Bloco 3: ConvNeXt-Small
 % ==========================================
 \begin{figure}[H]
 \centering
@@ -502,26 +502,34 @@ modelo de refinar suas representações nas épocas seguintes.
 
 \subsection{Matrizes de confusão}
 
-\begin{figure}[htbp]
+A análise das matrizes de confusão dos três melhores modelos detalha o comportamento de cada arquitetura frente ao desbalanceamento das classes e evidencia as suas forças e fragilidades individuais.
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=\columnwidth]{matriz_confusao_effnet512.png}
-\caption{Matriz de confusão do EfficientNetV2-S em 512\,px
-(\textit{checkpoint} da época\,10) no conjunto de validação.}
-\label{fig:confusao}
+\caption{Matriz de confusão do EfficientNetV2-S em 512\,px no conjunto de validação.}
+\label{fig:confusao_effnet}
 \end{figure}
 
-A análise da matriz de confusão do EfficientNetV2-S em 512\,px
-confirma que a classe \textit{Mild} é o ponto crítico do modelo.
-Grande parte dos seus erros ocorre por confusão com \textit{No\,DR}
-e \textit{Moderate}, o que faz sentido: lesões vasculares leves são
-visualmente próximas tanto de retinas sem doença quanto de
-estágios moderados da patologia. A classe \textit{Severe} também
-apresentou confusões relevantes, principalmente com \textit{Moderate}
-e \textit{Proliferative}. Em contrapartida, \textit{No\,DR} e
-\textit{Moderate} tiveram as diagonais mais fortes. Vale notar que,
-comparado aos experimentos em 384\,px, o modelo em 512\,px começou
-a prever \textit{Severe} e \textit{Proliferative} de forma consistente,
-o que não acontecia nas resoluções menores.
+A matriz do EfficientNetV2-S em 512\,px (Fig.~\ref{fig:confusao_effnet}) confirma que a classe \textit{Mild} é o ponto crítico do modelo. Grande parte dos seus erros ocorre por confusão com \textit{No\,DR} e \textit{Moderate}, o que faz sentido: lesões vasculares leves são visualmente próximas tanto de retinas sem doença quanto de estágios moderados da patologia. A classe \textit{Severe} também apresentou confusões relevantes, principalmente com \textit{Moderate} e \textit{Proliferative}. Em contrapartida, \textit{No\,DR} e \textit{Moderate} tiveram as diagonais mais fortes. Vale notar que, comparado aos experimentos em 384\,px, o modelo em 512\,px começou a prever \textit{Severe} e \textit{Proliferative} de forma consistente.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{matriz_confusao_convnext.png}
+\caption{Matriz de confusão do ConvNeXt-Small em 1024\,px no conjunto de validação.}
+\label{fig:confusao_convnext}
+\end{figure}
+
+O comportamento do ConvNeXt-Small em 1024\,px (Fig.~\ref{fig:confusao_convnext}) reflete diretamente os dados da Tabela~\ref{tab:metricas_classe}. A sua matriz revela um viés extremo para a classe majoritária (\textit{No\,DR}), alcançando um recall de 0,93 nessa categoria. Em contrapartida, o modelo praticamente ignorou a classe \textit{Mild} (recall de 0,05), classificando quase todas essas amostras como saudáveis (\textit{No\,DR}). Trata-se de um modelo excessivamente conservador, que atinge um alto coeficiente Kappa global apenas por não errar a classe predominante, mas que falha criticamente na detecção da patologia em seu estágio inicial.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{matriz_confusao_densenet.png}
+\caption{Matriz de confusão do DenseNet169 em 512\,px no conjunto de validação.}
+\label{fig:confusao_densenet}
+\end{figure}
+
+Já a matriz do DenseNet169 em 512\,px (Fig.~\ref{fig:confusao_densenet}) evidencia uma melhor distribuição das predições entre as classes de maior severidade. O modelo obteve a melhor taxa de verdadeiros positivos para a classe \textit{Proliferative} (recall de 0,67) e um desempenho considerável na classe \textit{Severe}. No entanto, sua precisão muito baixa na classe \textit{Mild} (0,17) indica que a rede tendeu a gerar muitos falsos positivos neste estágio intermediário, possivelmente classificando retinas saudáveis com minúsculas anomalias visuais como princípio de retinopatia.
 
 \subsection{Resultado do ensemble}
 
