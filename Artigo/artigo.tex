@@ -1,0 +1,662 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{multirow}
+\usepackage[brazil]{babel}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Análise Comparativa de Arquiteturas de Deep Learning para
+Classificação de Retinopatia Diabética}
+
+\author{
+\IEEEauthorblockN{
+Gabriel de Sousa Nobre,
+Victor Lins Gurgel do Amaral,
+Lorenzo Barros Calheiros Pinheiro,
+Davi Oliveira de Alencar}
+\IEEEauthorblockA{
+\textit{Graduação em Ciência da Computação} \\
+\textit{Universidade de Fortaleza (UNIFOR)} \\
+Fortaleza, Ceará, Brasil \\
+gabriel@email.com,
+vlinsgurgel@email.com,
+lorenzo@email.com,
+davi@email.com}}
+
+\maketitle
+
+\begin{abstract}
+A retinopatia diabética é uma importante causa de perda de visão,
+tornando relevante o desenvolvimento de métodos automatizados para
+apoiar sua triagem e diagnóstico. Este trabalho avaliou diferentes
+arquiteturas de aprendizado profundo para a classificação de
+imagens de retina em cinco níveis de severidade da doença,
+utilizando o dataset \textit{Diabetic Retinopathy (resized)}. Foram
+comparados modelos baseados em redes neurais convolucionais e Vision
+Transformers, empregando transferência de aprendizado, fine-tuning,
+aumento de dados e ponderação de classes para lidar com o
+desbalanceamento da base. Os resultados indicaram que arquiteturas
+modernas, como ConvNeXt-Small e EfficientNetV2-S, apresentaram os
+melhores desempenhos gerais. O ConvNeXt-Small obteve o maior coeficiente
+Kappa, enquanto o EfficientNetV2-S apresentou melhor equilíbrio entre
+Kappa e F1 macro. Também foi avaliada uma estratégia de ensemble
+baseada em \textit{Weighted Soft Voting}; entretanto, essa abordagem
+não superou os modelos individuais na configuração testada. Os
+resultados sugerem que a resolução das imagens, o ajuste fino das
+camadas e o tratamento do desbalanceamento são fatores determinantes
+para o desempenho na classificação multiclasse de retinopatia
+diabética.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Retinopatia diabética, classificação de imagens médicas,
+Deep Learning, CNNs, Vision Transformers, Transfer Learning.
+\end{IEEEkeywords}
+
+% =============================================================
+\section{Introdução}
+% =============================================================
+
+A retinopatia diabética (RD) é uma complicação microvascular
+do diabetes mellitus que afeta os vasos sanguíneos da retina e
+constitui uma das principais causas de cegueira evitável entre adultos
+em idade produtiva. O crescimento contínuo da população
+diabética mundial tem aumentado significativamente a demanda por
+programas de rastreamento e detecção precoce da doença.
+Segundo Grzybowski \cite{grzybowski2022}, a expansão global do
+diabetes e o aumento da incidência de retinopatia diabética tornam
+cada vez mais necessária a adoção de soluções escaláveis
+para triagem oftalmólogica, especialmente em regiões com recursos
+limitados e escassez de especialistas.
+
+Tradicionalmente, a identificação da retinopatia diabética é
+realizada por oftalmologistas por meio da análise de imagens de
+retinografia. Entretanto, a grande quantidade de exames gerados em
+programas de rastreamento populacional torna esse processo demorado,
+oneroso e dependente da disponibilidade de profissionais qualificados.
+Nesse contexto, técnicas de inteligência artificial, especialmente
+aquelas baseadas em aprendizado profundo, têm demonstrado grande
+potencial para automatizar a análise de imagens médicas e auxiliar
+a tomada de decisão clínica.
+
+Entre os trabalhos pioneiros da área, Gulshan et al. \cite{gulshan2016}
+desenvolveram um sistema baseado em redes neurais convolucionais profundas
+para detecção automática de retinopatia diabética em fotografias
+de retina. O modelo alcançou elevados índices de sensibilidade e
+especificidade em bases de validação independentes, demonstrando
+que algoritmos de aprendizado profundo podem atingir desempenho
+comparável ao de especialistas em tarefas de triagem da doença.
+
+Nos últimos anos, avanços arquiteturais têm impulsionado ainda
+mais o desempenho desses sistemas. Além das tradicionais Redes Neurais
+Convolucionais (Convolutional Neural Networks -- CNNs), arquiteturas
+baseadas em mecanismos de atenção, conhecidas como Vision
+Transformers (ViTs), passaram a apresentar resultados competitivos em
+diversas tarefas de visão computacional. Em um estudo comparativo
+envolvendo diferentes doenças da retina, Sayg{\i}l{\i} e At{\i}c{\i}
+\cite{saygili2025} observaram que o modelo Swin Transformer superou
+arquiteturas CNN convencionais e outros modelos Transformer avaliados,
+alcançando a maior acurácia entre os métodos analisados.
+
+Paralelamente, abordagens que combinam múltiplos modelos também vêm
+sendo investigadas com o objetivo de aumentar a robustez das
+predições. Rajeshwar et al. \cite{rajeshwar2025} propuseram uma
+arquitetura híbrida baseada em extração de características por
+aprendizado profundo e ensemble por stacking, obtendo resultados
+expressivos na detecção de retinopatia diabética. Esses estudos
+evidenciam o interesse crescente da comunidade científica em explorar
+diferentes arquiteturas e estratégias de combinação de modelos
+para melhorar o desempenho dos sistemas automatizados de apoio \`a
+triagem oftalmólogica.
+
+Apesar dos avanços observados na literatura, a classificação
+automática da retinopatia diabética ainda apresenta desafios
+relevantes. Um deles é o desbalanceamento entre as classes, uma vez
+que bases de dados públicas frequentemente possuem predomin\^ancia de
+imagens sem sinais da doença em comparação com os níveis
+mais severos. Além disso, trata-se de uma tarefa multiclasse e
+ordinal, pois os níveis de severidade seguem uma progressão clínica
+de 0 a 4, como pode ser observado na Fig.~\ref{DR_levels}. Dessa forma,
+métricas globais como acurácia podem não refletir adequadamente o
+desempenho do modelo em classes minoritárias, tornando necessária a
+análise de métricas como F1 macro e coeficiente Kappa ponderado.
+
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{DR_levels.png}
+\caption{Imagens do dataset por nível de severidade.}
+\label{DR_levels}
+\end{figure*}
+
+Diante desse contexto, este trabalho tem como objetivo avaliar e comparar
+diferentes arquiteturas de aprendizado profundo para a classificação
+de retinopatia diabética em imagens do fundo da retina. Foram
+investigados modelos baseados em CNNs e Vision Transformers, incluindo
+ResNet50, DenseNet121, DenseNet169, EfficientNet-B0, EfficientNet-B2,
+EfficientNetV2-S, ConvNeXt-Small e Swin-Tiny. Também foram avaliadas
+diferentes estratégias de fine-tuning, aumento de dados, balanceamento
+por pesos de classe e ensemble, buscando identificar as configurações
+mais adequadas para a tarefa proposta.
+
+% =============================================================
+\section{Metodologia}
+% =============================================================
+
+A metodologia adotada consistiu na comparação experimental de
+diferentes arquiteturas de aprendizado profundo para a classificação
+multiclasse de retinopatia diabética em imagens de fundo de retina.
+O fluxo experimental envolveu a preparação da base de dados, o
+pré-processamento das imagens, o treinamento de modelos pré-treinados
+por transferência de aprendizado, a aplicação de estratégias
+de balanceamento e a avaliação dos modelos por métricas
+adequadas a um problema ordinal e desbalanceado.
+
+\subsection{Dataset}
+
+Foi utilizado o dataset público \textit{Diabetic Retinopathy
+(resized)}\cite{dataset}, derivado da competição de retinopatia
+diabética do Kaggle \cite{APTOS2019}. A base contém 35.126 imagens
+de fundo de retina, rotuladas em cinco níveis de severidade: classe 0,
+sem retinopatia diabética; classe 1, retinopatia leve; classe 2,
+retinopatia moderada; classe 3, retinopatia severa; e classe 4,
+retinopatia proliferativa. Como esses rótulos representam níveis
+progressivos de gravidade clínica, o problema foi tratado como uma
+tarefa de classificação multiclasse ordinal.
+
+Os metadados originais da base são disponibilizados em um arquivo CSV
+contendo o identificador da imagem e o respectivo nível de severidade.
+Para otimizar o treinamento dos modelos, as imagens foram reorganizadas
+em diretórios separados por classe, utilizando uma estrutura compatível
+com o carregamento por \textit{ImageFolder}. O conjunto foi dividido em
+treino e validação na proporção 80/20, com separação
+estratificada por classe e semente fixa igual a 42. Não foi utilizado
+um conjunto de teste externo independente.
+
+\begin{table}[htbp]
+\caption{Distribuição da base de dados por classe}
+\label{tab:distribuicao_base}
+\centering
+\scriptsize
+\begin{tabular}{c l r r r}
+\hline
+\textbf{Classe} & \textbf{Descrição} & \textbf{Total} &
+\textbf{Treino} & \textbf{Val.} \\
+\hline
+0 & No DR         & 25.810 & 20.648 & 5.162 \\
+1 & Mild          &  2.443 &  1.955 &   488 \\
+2 & Moderate      &  5.292 &  4.234 & 1.058 \\
+3 & Severe        &    873 &    699 &   174 \\
+4 & Proliferative &    708 &    567 &   141 \\
+\hline
+\textbf{Total} & -- & \textbf{35.126} & \textbf{28.103} & \textbf{7.023} \\
+\hline
+\end{tabular}
+\end{table}
+
+Observa-se forte desbalanceamento entre as classes, com predomin\^ancia
+da classe 0, correspondente a imagens sem sinais de retinopatia diabética.
+Esse fator motivou o uso de métricas além da acurácia e a aplicação
+de estratégias de ponderação durante o treinamento.
+
+\subsection{Pré-processamento e balanceamento dos dados}
+
+As imagens foram redimensionadas de acordo com a configuração
+experimental de cada modelo, sendo avaliadas resoluções de
+224$\times$224, 256$\times$256, 384$\times$384, 512$\times$512 e
+1024$\times$1024 pixels. Também foi aplicada normalização com
+média e desvio padrão do ImageNet, uma vez que os modelos utilizados
+foram inicializados com pesos pré-treinados nesse conjunto.
+
+Para aumentar a variabilidade dos dados de treinamento e reduzir o risco
+de sobreajuste, foram aplicadas técnicas de \textit{data augmentation},
+incluindo inversões horizontal e vertical, rotações de até
+15 graus e alterações de cor por meio de \textit{ColorJitter}.
+Essas transformações foram aplicadas apenas ao conjunto de
+treinamento, preservando o conjunto de validação sem alterações
+artificiais além do redimensionamento e da normalização.
+
+Devido ao desbalanceamento observado entre as classes, foi utilizada a
+função de perda \textit{CrossEntropyLoss} ponderada por pesos de
+classe, calculados a partir da distribuição dos rótulos no
+conjunto de treinamento. Estratégias adicionais, como
+\textit{WeightedRandomSampler} e \textit{Focal Loss}, também foram
+exploradas, mas os principais experimentos utilizaram predominantemente
+a ponderação da função de perda.
+
+\subsection{Arquiteturas avaliadas e variações experimentais}
+
+Foram avaliadas arquiteturas baseadas em Redes Neurais Convolucionais e
+Vision Transformers. Entre os modelos convolucionais, foram testadas as
+arquiteturas EfficientNet-B0, EfficientNet-B2, EfficientNetV2-S,
+ResNet50, DenseNet121, DenseNet169 e ConvNeXt-Small. Como representante
+baseado em mecanismos de atenção visual, foi avaliado o modelo
+Swin-Tiny.
+
+Todos os modelos foram utilizados com pesos pré-treinados em ImageNet,
+caracterizando uma abordagem de transferência de aprendizado. A camada
+final de classificação foi substituída para produzir cinco
+saídas, correspondentes aos níveis de severidade da retinopatia
+diabética. As variações experimentais envolveram diferentes
+resoluções de entrada, graus de congelamento do \textit{backbone},
+otimizadores, taxas de aprendizado, tamanhos de lote e estratégias de
+fine-tuning.
+
+Inicialmente, foram avaliadas arquiteturas com maior nível de
+congelamento das camadas pré-treinadas, funcionando como
+configurações de referência. Em seguida, os modelos com
+resultados mais promissores foram submetidos a ajustes mais específicos,
+incluindo descongelamento parcial ou total do \textit{backbone}, aumento
+da resolução de entrada e alteração do otimizador. Essa
+estratégia permitiu analisar o impacto do fine-tuning e da
+resolução das imagens no desempenho dos classificadores.
+
+\subsection{Estratégia de treinamento}
+
+Os experimentos foram implementados em Python utilizando as bibliotecas
+PyTorch e torchvision, executados em GPUs NVIDIA compatíveis com CUDA.
+Em razão das limitações de memória gráfica disponível,
+os tamanhos de lote foram ajustados conforme a arquitetura e a
+resolução das imagens utilizadas.
+
+Foram utilizados os otimizadores Adam e AdamW, dependendo da
+configuração experimental. Em parte dos experimentos, foram
+aplicadas taxas de aprendizado distintas para o \textit{backbone} e
+para a cabeça classificadora, permitindo ajustes mais suaves nas
+camadas pré-treinadas e maior adaptação da camada final. Também
+foi utilizado o agendador \textit{ReduceLROnPlateau}, reduzindo a taxa de
+aprendizado quando não havia melhora na métrica de validação.
+
+O número máximo de épocas variou entre 25 e 50, conforme o modelo
+avaliado. Para evitar sobreajuste, foi empregado \textit{early stopping},
+monitorando principalmente o coeficiente Kappa ponderado quadrático no
+conjunto de validação. A versão final considerada para cada
+modelo correspondeu ao melhor \textit{checkpoint} obtido durante o
+treinamento, e não necessariamente \`a última época executada.
+
+\subsection{Estratégia de classificação e ensemble}
+
+A tarefa foi formulada como classificação multiclasse direta. Para
+cada imagem de entrada, o modelo produzia uma distribuição de
+probabilidades sobre as cinco classes, sendo atribuída como
+predição final a classe com maior probabilidade.
+
+Além da avaliação individual dos modelos, foi testada uma
+estratégia de ensemble baseada em \textit{Weighted Soft Voting}. Nessa
+abordagem, as probabilidades previstas por diferentes modelos foram
+combinadas por média ponderada, utilizando pesos proporcionais ao
+desempenho individual de cada arquitetura no conjunto de validação.
+O ensemble foi avaliado com o objetivo de verificar se a combinação
+de modelos de famílias distintas poderia melhorar a robustez das
+predições em comparação aos classificadores individuais.
+
+\subsection{Métricas de avaliação}
+
+O desempenho dos modelos foi avaliado por meio de acurácia,
+precisão macro, recall macro, F1-score macro e coeficiente Kappa
+ponderado quadrático. A acurácia foi utilizada como medida geral da
+taxa de acerto; entretanto, devido ao forte desbalanceamento entre as
+classes, essa métrica não foi considerada suficiente de forma
+isolada.
+
+O F1-score macro foi utilizado por atribuir o mesmo peso a todas as
+classes, independentemente da frequência de cada uma na base, o que
+permite avaliar melhor o desempenho dos modelos nas classes
+minoritárias. O coeficiente Kappa ponderado quadrático foi adotado
+como métrica principal de comparação, pois considera a natureza
+ordinal do problema, penalizando de forma mais intensa erros entre
+classes distantes na escala de severidade. Também foram analisadas
+matrizes de confusão para identificar os principais padrões de erro
+entre os níveis de retinopatia diabética.
+
+% =============================================================
+\section{Resultados e Discussão}
+% =============================================================
+
+\subsection{Comparação geral entre os modelos}
+
+A Tabela~\ref{tab:comparacao_modelos} reúne os principais resultados
+obtidos. Para não sobrecarregar a comparação com todos os
+experimentos realizados, foram incluídos o baseline, o melhor
+representante de cada família arquitetural e o ensemble final.
+
+\begin{table}[htbp]
+\caption{Comparação dos principais modelos avaliados}
+\label{tab:comparacao_modelos}
+\centering
+\scriptsize
+\begin{tabular}{l c c c c}
+\hline
+\textbf{Modelo} & \textbf{Res.} & \textbf{Accuracy} & \textbf{F1 Macro} & \textbf{Kappa} \\
+\hline
+EfficientNet-B0 (Baseline) & 224  & 0,74 & 0,27 & 0,26 \\
+Swin-Tiny                  & 224  & 0,69 & 0,52 & 0,63 \\
+DenseNet169                & 512  & 0,75 & 0,55 & 0,71 \\
+EfficientNetV2-S           & 512  & 0,80 & 0,54 & 0,73 \\
+ConvNeXt-Small             & 1024 & 0,82 & 0,53 & 0,75 \\
+Ensemble                   & --   & 0,73 & 0,39 & 0,47 \\
+\hline
+\end{tabular}
+\end{table}
+
+O caso do EfficientNet-B0 é ilustrativo de um problema recorrente em
+bases desbalanceadas: acurácia de 0,74 com kappa de apenas 0,26
+indica que o modelo aprendeu, na prática, a prever quase sempre a
+classe \textit{No\,DR} sem real capacidade de distinguir os níveis da
+doença. Essa discrep\^ancia reforça a import\^ancia de avaliar
+os modelos pelo kappa quadrático e pelo F1 macro, e não apenas pela
+acurácia global.
+
+\subsection{Melhores modelos individuais}
+
+Os três modelos com melhor desempenho --- ConvNeXt-Small,
+EfficientNetV2-S e DenseNet169 --- apresentaram perfis bastante
+distintos, e essa diferença é relevante do ponto de vista
+clínico.
+
+O ConvNeXt-Small obteve o maior kappa do estudo (0,7453), mas com uma
+fragilidade importante: recall de apenas 0,05 para a classe
+\textit{Mild} (F1~=~0,09). Na prática, isso significa que o modelo
+quase não detecta o estágio inicial da retinopatia, que é
+justamente onde a intervenção precoce teria maior impacto. O bom
+resultado geral acaba mascarado pela domin\^ancia da classe
+\textit{No\,DR}, que corresponde a 73\% das amostras e teve recall de
+0,93.
+
+O EfficientNetV2-S em 512\,px mostrou o melhor equilíbrio geral entre
+as cinco classes, com kappa de 0,7313 e F1 macro de 0,54. Os recalls de
+0,42 para \textit{Severe} e 0,67 para \textit{Proliferative} indicam
+que o modelo conseguiu aprender características das classes mais
+graves, mesmo com muito menos exemplos disponíveis. A classe
+\textit{Mild} permaneceu a mais difícil (recall 0,34; F1 0,27) ---
+um resultado esperado, considerando que essa classe tem cerca de 10
+vezes menos amostras que \textit{No\,DR} e que suas alterações
+vasculares são visualmente sutis, podendo se confundir facilmente com
+retinas saudáveis.
+
+O DenseNet169 em 512\,px fechou o grupo dos melhores com kappa 0,7114 e
+F1 macro de 0,55. Sua convergência mais lenta --- pico na
+época\,18 --- sugere um treinamento mais gradual e estável, e seu
+ponto forte ficou no recall de \textit{Proliferative} (0,67), o melhor
+entre todos os modelos testados. A Tabela~\ref{tab:metricas_classe}
+detalha as métricas por classe dos três modelos.
+
+\begin{table}[htbp]
+\caption{Métricas por classe --- melhores modelos individuais}
+\label{tab:metricas_classe}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{l l c c c}
+\hline
+\textbf{Modelo} & \textbf{Classe} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} \\
+\hline
+\multirow{5}{*}{\shortstack[l]{ConvNeXt-S \\ (1024\,px)}}
+  & No DR    & 0,90 & 0,93 & 0,92 \\
+  & Mild     & 0,41 & 0,05 & 0,09 \\
+  & Moderate & 0,55 & 0,48 & 0,51 \\
+  & Severe   & 0,52 & 0,28 & 0,36 \\
+  & Prolif.  & 0,71 & 0,55 & 0,62 \\
+\hline
+\multirow{5}{*}{\shortstack[l]{EffNetV2-S \\ (512\,px)}}
+  & No DR    & 0,90 & 0,85 & 0,88 \\
+  & Mild     & 0,22 & 0,34 & 0,27 \\
+  & Moderate & 0,59 & 0,60 & 0,60 \\
+  & Severe   & 0,44 & 0,42 & 0,43 \\
+  & Prolif.  & 0,57 & 0,67 & 0,61 \\
+\hline
+\multirow{5}{*}{\shortstack[l]{DenseNet169 \\ (512\,px)}}
+  & No DR    & 0,89 & 0,85 & 0,87 \\
+  & Mild     & 0,17 & 0,30 & 0,22 \\
+  & Moderate & 0,62 & 0,51 & 0,56 \\
+  & Severe   & 0,39 & 0,53 & 0,45 \\
+  & Prolif.  & 0,67 & 0,67 & 0,67 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Curvas de aprendizagem}
+
+% Descomente este bloco quando a figura estiver pronta:
+% \begin{figure}[htbp]
+% \centering
+% \includegraphics[width=\columnwidth]{curvas_aprendizado.png}
+% \caption{Curvas de \textit{loss} e kappa quadrático de
+% validação por época para os três melhores modelos.}
+% \label{fig:curvas}
+% \end{figure}
+
+As curvas de convergência mostram comportamentos bem diferentes entre
+os modelos. Na Fig.\ref{fig:acc_v2} o EfficientNetV2-S convergiu de forma estável ao longo de
+14 épocas, sem sinais evidentes de sobreajuste até que o
+\textit{early stopping} interrompeu o treinamento. O DenseNet169 levou
+mais tempo para estabilizar, mas manteve progressão consistente até
+a época\,18. Já o ConvNeXt-Small atingiu seu melhor resultado na
+época\,3 --- um comportamento notável. A combinação de
+\textit{backbone} amplamente descongelado com imagens de 1024\,px parece
+ter acelerado demais o aprendizado inicial, limitando a capacidade do
+modelo de refinar suas representações nas épocas seguintes.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{aprendizado.png}
+\caption{Curva de aprendizado da loss do EfficientNetV2-S em 512\,px
+(\textit{checkpoint} da época\,14) no conjunto de validação e treinamento.}
+\label{fig:loss_v2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{acuracia.png}
+\caption{Curva de aprendizado da acurácia do EfficientNetV2-S em 512\,px
+(\textit{checkpoint} da época\,14) no conjunto de validação e treinamento.}
+\label{fig:acc_v2}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{aprendizado_densenet.png}
+\caption{Curva de aprendizado da loss do DenseNet169
+(\textit{checkpoint} da época\,18) no conjunto de validação e treinamento.}
+\label{fig:loss_dense}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{acuracia_densenet.png}
+\caption{Curva de aprendizado da acurácia do DenseNet169
+(\textit{checkpoint} da época\,18) no conjunto de validação e treinamento.}
+\label{fig:acc_dense}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{aprendizado_convnext.png}
+\caption{Curva de aprendizado da loss do ConvNeXt-Small
+(\textit{checkpoint} da época\,3) no conjunto de validação e treinamento.}
+\label{fig:loss_dense}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{acuracia_convnext.png}
+\caption{Curva de aprendizado da acurácia do ConvNeXt-Small
+(\textit{checkpoint} da época\,3) no conjunto de validação e treinamento.}
+\label{fig:acc_dense}
+\end{figure}
+
+\subsection{Matrizes de confusão}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\columnwidth]{matriz_confusao_effnet512.png}
+\caption{Matriz de confusão do EfficientNetV2-S em 512\,px
+(\textit{checkpoint} da época\,10) no conjunto de validação.}
+\label{fig:confusao}
+\end{figure}
+
+A análise da matriz de confusão do EfficientNetV2-S em 512\,px
+confirma que a classe \textit{Mild} é o ponto crítico do modelo.
+Grande parte dos seus erros ocorre por confusão com \textit{No\,DR}
+e \textit{Moderate}, o que faz sentido: lesões vasculares leves são
+visualmente próximas tanto de retinas sem doença quanto de
+estágios moderados da patologia. A classe \textit{Severe} também
+apresentou confusões relevantes, principalmente com \textit{Moderate}
+e \textit{Proliferative}. Em contrapartida, \textit{No\,DR} e
+\textit{Moderate} tiveram as diagonais mais fortes. Vale notar que,
+comparado aos experimentos em 384\,px, o modelo em 512\,px começou
+a prever \textit{Severe} e \textit{Proliferative} de forma consistente,
+o que não acontecia nas resoluções menores.
+
+\subsection{Resultado do ensemble}
+
+O ensemble por \textit{Weighted Soft Voting} apresentou desempenho
+inferior ao esperado. Combinando seis modelos com pesos proporcionais ao
+kappa individual de cada um, o resultado foi kappa de 0,4691 e F1 macro
+de 0,39 --- pior que qualquer um dos três melhores modelos isolados,
+como mostra a Tabela~\ref{tab:ensemble}.
+
+\begin{table}[htbp]
+\caption{Melhores modelos individuais versus ensemble}
+\label{tab:ensemble}
+\centering
+\scriptsize
+\begin{tabular}{l c c}
+\hline
+\textbf{Modelo} & \textbf{F1 Macro} & \textbf{Kappa} \\
+\hline
+ConvNeXt-Small (1024\,px)  & 0,53 & 0,75 \\
+EfficientNetV2-S (512\,px) & 0,54 & 0,73 \\
+DenseNet169 (512\,px)      & 0,55 & 0,71 \\
+\textbf{Ensemble}          & \textbf{0,39} & \textbf{0,47} \\
+\hline
+\end{tabular}
+\end{table}
+
+A hipótese mais provável para esse resultado é a incompatibilidade
+entre as distribuições de probabilidade dos modelos: quando as
+saídas não estão calibradas numa mesma escala, a média ponderada
+tende a produzir predições inconsistentes. Além disso, os pesos
+do ensemble foram definidos de forma fixa, sem otimização sobre o
+conjunto de validação. Não se pode descartar também algum
+problema no carregamento dos \textit{checkpoints} de arquiteturas
+distintas durante a execução. Assim, na configuração
+avaliada, o ensemble não apresentou ganho suficiente para justificar
+seu custo computacional adicional.
+
+\subsection{Discussão dos principais achados}
+
+Um dos achados mais relevantes ao longo dos experimentos foi o impacto
+da resolução. Aumentar o EfficientNetV2-S de 384\,px para 512\,px
+elevou o kappa de 0,57 para 0,73 e quase dobrou o recall de
+\textit{Mild}, de 0,26 para 0,34. A explicação é direta:
+microaneurismas e exsudatos característicos dos estágios iniciais da
+retinopatia são estruturas pequenas, e resoluções menores podem
+reduzir ou eliminar detalhes importantes que o modelo precisaria aprender
+a reconhecer.
+
+O desbalanceamento da base, por outro lado, provou ser mais resistente
+do que o esperado. A ponderação de classes na função de
+perda ajudou, mas não foi suficiente para compensar uma razão de
+36:1 entre \textit{No\,DR} e \textit{Proliferative}. A situação
+da classe \textit{Mild} é ainda mais delicada porque combina dois
+problemas ao mesmo tempo: poucos exemplos e alta similaridade visual
+com outras classes. O ConvNeXt-Small ilustra bem o risco de não
+observar as métricas por classe: kappa de 0,7453, mas F1 de 0,09
+para \textit{Mild}. Um modelo assim poderia passar por uma
+avaliação superficial e ainda assim ser inapropriado para uso
+clínico real.
+
+Quanto ao ensemble, os resultados indicam que combinar modelos sem
+calibração prévia pode ser contraproducente. Sem garantir que
+as distribuições de probabilidade de cada modelo estejam numa
+mesma escala, a combinação por média ponderada não agrega
+informação de forma coerente. é uma lição importante:
+ensemble não é uma solução automática para melhorar
+desempenho --- a implementação importa tanto quanto a estratégia.
+
+% =============================================================
+\section{Conclusão}
+% =============================================================
+
+Este trabalho avaliou diferentes configurações de arquiteturas de
+aprendizado profundo --- incluindo CNNs modernas e um Vision Transformer
+--- para a classificação de cinco níveis de severidade de
+retinopatia diabética em 35.126 imagens de fundo de retina. Foram
+investigados o impacto da resolução de entrada, do fine-tuning
+parcial do \textit{backbone}, da ponderação de classes e da
+combinação de modelos por ensemble.
+
+O EfficientNetV2-S em 512$\times$512 pixels apresentou o melhor
+equilíbrio clínico, com kappa de 0,7313 e F1 macro de 0,54, sendo
+um dos modelos com maior capacidade de detectar os cinco níveis de forma
+consistente. O ConvNeXt-Small alcançou o maior kappa absoluto
+(0,7453), mas seu recall de 0,05 para \textit{Mild} compromete sua
+utilidade em cenários de triagem precoce. O ensemble não superou os
+modelos individuais, evidenciando que a combinação de modelos
+exige calibração adequada para ser efetiva.
+
+De forma geral, os experimentos mostraram que resolução e
+fine-tuning são fatores decisivos para o desempenho, mas que o
+desbalanceamento extremo da base permanece o principal obstáculo.
+Nenhuma das estratégias testadas foi suficiente para garantir boa
+detecção em todas as classes simultaneamente --- especialmente em
+\textit{Mild}, onde a dificuldade é tanto estatística quanto visual.
+
+O estudo tem limitações relevantes: não foi utilizado conjunto
+de teste externo independente, as restrições de memória de GPU
+impediram explorar 1024\,px em todas as arquiteturas, e os experimentos
+com \textit{focal loss} e \textit{sampler} não foram concluídos.
+Para trabalhos futuros, as direções mais promissoras incluem
+\textit{data augmentation} seletiva nas classes minoritárias ---
+aplicando transformações mais intensas especificamente sobre
+\textit{Mild}, \textit{Severe} e \textit{Proliferative} como forma de
+oversampling sem introduzir ruído nas classes já bem representadas
+---, validação cruzada estratificada, \textit{threshold moving}
+por classe, calibração de probabilidades para viabilizar o ensemble
+e aplicação de Grad-CAM para interpretar as regiões de interesse
+identificadas pelos modelos.
+
+% =============================================================
+\begin{thebibliography}{00}
+% =============================================================
+\bibitem{grzybowski2022} A. Grzybowski, ``Artificial intelligence for
+diabetic retinopathy screening,'' \textit{Acta Ophthalmol.}, vol.~100,
+2022, doi: 10.1111/j.1755-3768.2022.15371.
+
+\bibitem{gulshan2016} V. Gulshan et al., ``Development and Validation of
+a Deep Learning Algorithm for Detection of Diabetic Retinopathy in
+Retinal Fundus Photographs,'' \textit{JAMA}, vol.~316, no.~22,
+pp.~2402--2410, Dec. 2016, doi: 10.1001/jama.2016.17216.
+
+\bibitem{saygili2025} A. Sayg{\i}l{\i} and \"O.\,M. At{\i}c{\i},
+``Enhancing Retinal Disease Detection With the Swin Transformer: A
+Comprehensive Comparative Analysis,''
+\textit{Concurrency Computat. Pract. Exper.}, vol.~37, no.~27--28,
+p.~e70366, 2025, doi: 10.1002/cpe.70366.
+
+\bibitem{rajeshwar2025} S. Rajeshwar, S. Thaplyal, A.\,M., and
+G. Siva Shanmugam, ``Diabetic Retinopathy Detection Using DL-Based
+Feature Extraction and a Hybrid Attention-Based Stacking Ensemble,''
+\textit{Adv. Public Health}, vol.~2025, p.~8863096, 2025,
+doi: 10.1155/adph/8863096.
+
+\bibitem{dataset} ilovescience, ``Diabetic Retinopathy Resized,''
+Kaggle, 2019. Disponível em:
+https://www.kaggle.com/datasets/tanlikesmath/diabetic-retinopathy-resized.
+Acesso em: 4 jun. 2026.
+
+\bibitem{APTOS2019} Karthik, Maggie, e S. Dane, ``APTOS 2019 Blindness
+Detection,'' Kaggle, 2019. Disponível em:
+https://kaggle.com/competitions/aptos2019-blindness-detection.
+Acesso em: 4 jun. 2026.
+\end{thebibliography}
+
+\end{document}
