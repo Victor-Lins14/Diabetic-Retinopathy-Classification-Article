@@ -66,6 +66,13 @@ Deep Learning, CNNs, Vision Transformers, Transfer Learning.
 \section{Introdução}
 % =============================================================
 
+\begin{figure*}[htbp]
+\centering
+\includegraphics[width=\textwidth]{DR_levels.png}
+\caption{Imagens do dataset por nível de severidade.}
+\label{DR_levels}
+\end{figure*}
+
 A retinopatia diabética (RD) é uma complicação microvascular
 do diabetes mellitus que afeta os vasos sanguíneos da retina e
 constitui uma das principais causas de cegueira evitável entre adultos
@@ -129,13 +136,6 @@ de 0 a 4, como pode ser observado na Fig.~\ref{DR_levels}. Dessa forma,
 métricas globais como acurácia podem não refletir adequadamente o
 desempenho do modelo em classes minoritárias, tornando necessária a
 análise de métricas como F1 macro e coeficiente Kappa ponderado.
-
-\begin{figure*}[htbp]
-\centering
-\includegraphics[width=0.9\textwidth]{DR_levels.png}
-\caption{Imagens do dataset por nível de severidade.}
-\label{DR_levels}
-\end{figure*}
 
 Diante desse contexto, este trabalho tem como objetivo avaliar e comparar
 diferentes arquiteturas de aprendizado profundo para a classificação
@@ -209,6 +209,34 @@ de estratégias de ponderação durante o treinamento.
 
 \subsection{Pré-processamento e balanceamento dos dados}
 
+
+\begin{table*}[htbp]
+\caption{Resumo das principais configurações e experimentos realizados}
+\label{tab:resumo_experimentos}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l l c l l c l}
+\hline
+\textbf{Modelo} & \textbf{Resolução} & \textbf{Backbone} & \textbf{Augmentation} & \textbf{Otimizador (LR Head / LR Base)} & \textbf{Épocas} & \textbf{Observações} \\
+\hline
+EfficientNet-B0 & 224$\times$224 & Congelado & Hor/Vert Flip & Adam (1e-4 / 1e-5) & 25 & Baseline \\
+EfficientNet-B2 & 380$\times$380 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 19/25 & Class weights aplicados \\
+ResNet50 & 256$\times$256 & 25\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 23/25 & Baixo F1-Macro \\
+ResNet50 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 24/25 & Desempenho intermediário \\
+DenseNet121 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 21/25 & Ótima taxa de acerto \\
+DenseNet169 & 512$\times$512 & 89.6\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 18/25 & Melhor recall em severos \\
+EfficientNetV2-S & 384$\times$384 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 17/25 & Melhoria com imagens maiores \\
+EfficientNetV2-S & 512$\times$512 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 14/25 & \textbf{Melhor equilíbrio clínico} \\
+Swin-Tiny & 224$\times$224 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 25/25 & Desempenho forte em baixa res. \\
+ConvNeXt-Small & 512$\times$512 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 29/50 & Early stopping acionado \\
+ConvNeXt-Small & 1024$\times$1024 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 3/50 & \textbf{Maior Kappa geral} \\
+\hline
+\multicolumn{7}{l}{\textit{Nota: Todos os modelos utilizaram paciência de 2 épocas para o Scheduler e pesos de classe (class weights) para lidar com o desbalanceamento.}}
+\end{tabular}
+}
+\end{table*}
+
 As imagens foram redimensionadas de acordo com a configuração
 experimental de cada modelo, sendo avaliadas resoluções de
 224$\times$224, 256$\times$256, 384$\times$384, 512$\times$512 e
@@ -242,33 +270,6 @@ baseado em mecanismos de atenção visual, foi avaliado o modelo
 Swin-Tiny.
 
 A Tabela~\ref{tab:resumo_experimentos} apresenta o resumo de todas as principais configurações e variações experimentais testadas ao longo do trabalho. Todos os modelos foram utilizados com pesos pré-treinados em ImageNet, caracterizando uma abordagem de transferência de aprendizado. A camada final de classificação foi substituída para produzir cinco saídas, correspondentes aos níveis de severidade da retinopatia diabética. 
-
-\begin{table*}[htbp]
-\caption{Resumo das principais configurações e experimentos realizados}
-\label{tab:resumo_experimentos}
-\centering
-\scriptsize
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l l c l l c l}
-\hline
-\textbf{Modelo} & \textbf{Resolução} & \textbf{Backbone} & \textbf{Augmentation} & \textbf{Otimizador (LR Head / LR Base)} & \textbf{Épocas} & \textbf{Observações} \\
-\hline
-EfficientNet-B0 & 224$\times$224 & Congelado & Hor/Vert Flip & Adam (1e-4 / 1e-5) & 25 & Baseline \\
-EfficientNet-B2 & 380$\times$380 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 19/25 & Class weights aplicados \\
-ResNet50 & 256$\times$256 & 25\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 23/25 & Baixo F1-Macro \\
-ResNet50 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 24/25 & Desempenho intermediário \\
-DenseNet121 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 21/25 & Ótima taxa de acerto \\
-DenseNet169 & 512$\times$512 & 89.6\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 18/25 & Melhor recall em severos \\
-EfficientNetV2-S & 384$\times$384 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 17/25 & Melhoria com imagens maiores \\
-EfficientNetV2-S & 512$\times$512 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 14/25 & \textbf{Melhor equilíbrio clínico} \\
-Swin-Tiny & 224$\times$224 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 25/25 & Desempenho forte em baixa res. \\
-ConvNeXt-Small & 512$\times$512 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 29/50 & Early stopping acionado \\
-ConvNeXt-Small & 1024$\times$1024 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 3/50 & \textbf{Maior Kappa geral} \\
-\hline
-\multicolumn{7}{l}{\textit{Nota: Todos os modelos utilizaram paciência de 2 épocas para o Scheduler e pesos de classe (class weights) para lidar com o desbalanceamento.}}
-\end{tabular}
-}
-\end{table*}
 
 Inicialmente, foram avaliadas arquiteturas com maior nível de congelamento das camadas pré-treinadas, funcionando como configurações de referência. Em seguida, os modelos com resultados mais promissores foram submetidos a ajustes mais específicos, incluindo descongelamento parcial ou total do \textit{backbone}, aumento da resolução de entrada e alteração do otimizador. Essa estratégia permitiu analisar o impacto do fine-tuning e da resolução das imagens no desempenho dos classificadores.
 
