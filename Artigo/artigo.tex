@@ -208,6 +208,34 @@ de estratégias de ponderação durante o treinamento.
 
 \subsection{Pré-processamento e balanceamento dos dados}
 
+\begin{table*}[htbp]
+\caption{Resumo das principais configurações e experimentos realizados}
+\label{tab:resumo_experimentos}
+\centering
+\scriptsize
+\resizebox{\textwidth}{!}{
+\begin{tabular}{l l c l l c l}
+\hline
+\textbf{Modelo} & \textbf{Resolução} & \textbf{Backbone} & \textbf{Augmentation} & \textbf{Otimizador (LR Head / LR Base)} & \textbf{Épocas} & \textbf{Observações} \\
+\hline
+EfficientNet-B0 & 224$\times$224 & Congelado & Hor/Vert Flip & Adam (1e-4 / 1e-5) & 25 & Baseline \\
+EfficientNet-B2 & 380$\times$380 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 19/25 & Class weights aplicados \\
+ResNet50 & 256$\times$256 & 25\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 23/25 & Baixo F1-Macro \\
+ResNet50 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 24/25 & Desempenho intermediário \\
+DenseNet121 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 21/25 & Ótima taxa de acerto \\
+DenseNet169 & 512$\times$512 & 89.6\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 18/25 & Melhor recall em severos \\
+EfficientNetV2-S & 384$\times$384 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 17/25 & Melhoria com imagens maiores \\
+EfficientNetV2-S & 512$\times$512 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 14/25 & \textbf{Melhor equilíbrio clínico} \\
+Swin-Tiny & 224$\times$224 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 25/25 & Desempenho forte em baixa res. \\
+ConvNeXt-Small & 512$\times$512 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 29/50 & Early stopping acionado \\
+ConvNeXt-Small & 1024$\times$1024 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 3/50 & \textbf{Maior Kappa geral} \\
+\hline
+\multicolumn{7}{l}{\textit{Nota: Todos os modelos utilizaram paciência de 2 épocas para o Scheduler e pesos de classe (class weights) para lidar com o desbalanceamento.}}
+\end{tabular}
+}
+\end{table*}
+
+
 As imagens foram redimensionadas de acordo com a configuração
 experimental de cada modelo, sendo avaliadas resoluções de
 224$\times$224, 256$\times$256, 384$\times$384, 512$\times$512 e
@@ -241,33 +269,6 @@ baseado em mecanismos de atenção visual, foi avaliado o modelo
 Swin-Tiny.
 
 A Tabela~\ref{tab:resumo_experimentos} apresenta o resumo de todas as principais configurações e variações experimentais testadas ao longo do trabalho. Todos os modelos foram utilizados com pesos pré-treinados em ImageNet, caracterizando uma abordagem de transferência de aprendizado. A camada final de classificação foi substituída para produzir cinco saídas, correspondentes aos níveis de severidade da retinopatia diabética.
-
-\begin{table*}[htbp]
-\caption{Resumo das principais configurações e experimentos realizados}
-\label{tab:resumo_experimentos}
-\centering
-\scriptsize
-\resizebox{\textwidth}{!}{
-\begin{tabular}{l l c l l c l}
-\hline
-\textbf{Modelo} & \textbf{Resolução} & \textbf{Backbone} & \textbf{Augmentation} & \textbf{Otimizador (LR Head / LR Base)} & \textbf{Épocas} & \textbf{Observações} \\
-\hline
-EfficientNet-B0 & 224$\times$224 & Congelado & Hor/Vert Flip & Adam (1e-4 / 1e-5) & 25 & Baseline \\
-EfficientNet-B2 & 380$\times$380 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 19/25 & Class weights aplicados \\
-ResNet50 & 256$\times$256 & 25\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 23/25 & Baixo F1-Macro \\
-ResNet50 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 24/25 & Desempenho intermediário \\
-DenseNet121 & 256$\times$256 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 21/25 & Ótima taxa de acerto \\
-DenseNet169 & 512$\times$512 & 89.6\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 18/25 & Melhor recall em severos \\
-EfficientNetV2-S & 384$\times$384 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 17/25 & Melhoria com imagens maiores \\
-EfficientNetV2-S & 512$\times$512 & 85\% desc. & Flip, Rot 15º, Color Jitter & Adam (1e-4 / 1e-5) & 14/25 & \textbf{Melhor equilíbrio clínico} \\
-Swin-Tiny & 224$\times$224 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4) & 25/25 & Desempenho forte em baixa res. \\
-ConvNeXt-Small & 512$\times$512 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 29/50 & Early stopping acionado \\
-ConvNeXt-Small & 1024$\times$1024 & 100\% desc. & Flip, Rot 15º, Color Jitter & AdamW (1e-4 / 1e-5) & 3/50 & \textbf{Maior Kappa geral} \\
-\hline
-\multicolumn{7}{l}{\textit{Nota: Todos os modelos utilizaram paciência de 2 épocas para o Scheduler e pesos de classe (class weights) para lidar com o desbalanceamento.}}
-\end{tabular}
-}
-\end{table*}
 
 Inicialmente, foram avaliadas arquiteturas com maior nível de congelamento das camadas pré-treinadas, funcionando como configurações de referência. Em seguida, os modelos com resultados mais promissores foram submetidos a ajustes mais específicos, incluindo descongelamento parcial ou total do \textit{backbone}, aumento da resolução de entrada e alteração do otimizador. Essa estratégia permitiu analisar o impacto do fine-tuning e da resolução das imagens no desempenho dos classificadores.
 
@@ -597,7 +598,7 @@ Este trabalho avaliou diferentes configurações de arquiteturas de aprendizado 
 
 Dentre as arquiteturas analisadas, o EfficientNetV2-S em 512$\times$512 pixels apresentou o melhor equilíbrio clínico, com kappa de 0,7313 e F1 macro de 0,54. O ConvNeXt-Small alcançou o maior kappa absoluto (0,7453), porém, seu recall de apenas 0,05 para a classe \textit{Mild} compromete drasticamente sua utilidade em um cenário real de triagem precoce. A abordagem de combinação de modelos por \textit{ensemble} não superou as arquiteturas individuais, evidenciando que a agregação de predições exige calibração rigorosa de probabilidades para ser efetiva.
 
-Apesar de a métrica Kappa ter sido priorizada em detrimento da acurácia global para mitigar o viés da classe majoritária, a distribuição fortemente desbalanceada dos dados ainda "mascarou" o desempenho real das redes nas classes minoritárias. A aplicação de \textit{class weights} na função de perda auxiliou o aprendizado inicialmente, mas provou-se insuficiente para resolver o problema estrutural da base. Outras técnicas mais robustas de tratamento de desbalanceamento deveriam ter sido exploradas exaustivamente para evitar a negligência algorítmica dos estágios iniciais da doença.
+Apesar de a métrica Kappa ter sido priorizada em detrimento da acurácia global para mitigar o viés da classe majoritária, a distribuição fortemente desbalanceada dos dados ainda "mascarou" \ o desempenho real das redes nas classes minoritárias. A aplicação de \textit{class weights} na função de perda auxiliou o aprendizado inicialmente, mas provou-se insuficiente para resolver o problema estrutural da base. Outras técnicas mais robustas de tratamento de desbalanceamento deveriam ter sido exploradas exaustivamente para evitar a negligência algorítmica dos estágios iniciais da doença.
 
 Outra consideração técnica crítica levantada ao longo dos experimentos diz respeito à manipulação da resolução das imagens. Alterar as dimensões de entrada de um mesmo modelo pré-treinado em diferentes testes não é considerado uma boa prática computacional. Cada arquitetura é desenhada e otimizada matematicamente para trabalhar com dimensões específicas. Ainda que o \textit{framework} de Deep Learning readapte os tensores internamente por meio de \textit{adaptive pooling} para evitar erros de compilação, o número de parâmetros, o arranjo das camadas e a profundidade dos mapas de características permanecem inalterados. Forçar resoluções arbitrárias pode, consequentemente, comprometer a eficiência da extração de \textit{features} nativa da rede.
 
